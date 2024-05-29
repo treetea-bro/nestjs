@@ -1,4 +1,12 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { User } from '../models/User';
 import { mockUsers } from 'src/__mocks__/mockUsers';
 import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -7,8 +15,12 @@ import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import * as Upload from 'graphql-upload/Upload.js';
 import { createCanvas, loadImage, registerFont } from 'canvas';
 import { ConfigService } from '@nestjs/config';
+import { UserSetting } from '../models/UserSetting';
+import { mockUserSettings } from 'src/__mocks__/mcokUserSettings';
 
-@Resolver()
+export const incrementalId = 3;
+
+@Resolver(() => User)
 export class UserResolver {
   constructor(private configService: ConfigService) {}
 
@@ -21,6 +33,14 @@ export class UserResolver {
   getUsers() {
     return mockUsers;
   }
+
+  @ResolveField(() => UserSetting, { name: 'settings', nullable: true })
+  getUserSettings(@Parent() user: User) {
+    return mockUserSettings.find((setting) => setting.userId === user.id);
+  }
+
+  // @Mutation(() => User)
+  // createUser(@Args('username')) {}
 
   @Mutation(() => Boolean, { name: 'uploadImage' })
   async uploadImage(
