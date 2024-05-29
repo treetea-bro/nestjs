@@ -34,21 +34,21 @@ export class UserResolver {
     return new Promise((resolve, reject) => {
       if (createFileInDirectory) {
         const rootPath = this.configService.get<string>('rootPath');
-        const dirPath = this.configService.get<string>('uploadsPath');
+        const uploadsPath = this.configService.get<string>('uploadsPath');
 
-        console.log(dirPath, existsSync(dirPath));
+        console.log(uploadsPath, existsSync(uploadsPath));
 
-        if (!existsSync(dirPath)) {
-          mkdirSync(dirPath, { recursive: true });
+        if (!existsSync(uploadsPath)) {
+          mkdirSync(uploadsPath, { recursive: true });
         }
 
         file
           .createReadStream()
-          .pipe(createWriteStream(`${dirPath}/${file.filename}`))
+          .pipe(createWriteStream(`${uploadsPath}/${file.filename}`))
           .on('finish', () => {
             console.log('IMAGE_CREATED_IN_DIRECTORY');
 
-            loadImage(join(rootPath, file.filename)).then(async (img) => {
+            loadImage(join(uploadsPath, file.filename)).then(async (img) => {
               registerFont(join(rootPath, 'NotoSansKR-Regular.ttf'), {
                 family: 'NotoSansKR',
               });
@@ -58,7 +58,7 @@ export class UserResolver {
               context.drawImage(img, 0, 0, 1024, 500);
               context.fillStyle = '#ffffff';
               context.font = '52px NotoSansKR';
-              context.fillText('안녕zzzzcv', 360, 360);
+              context.fillText('안녕ddㅓㅏ미zzzzcv', 360, 360);
               context.beginPath();
               context.arc(512, 166, 128, 0, Math.PI * 2, true);
               context.stroke();
