@@ -9,5 +9,13 @@ type User {
 }
 
 type Query {
-  getUser: User!
+  getUserById(id: Int!): User
+  getUsers: [User!]!
 }
+
+type Mutation {
+  uploadImage(image: Upload!, createFileInDirectory: Boolean!): Boolean!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
