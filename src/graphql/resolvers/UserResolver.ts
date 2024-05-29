@@ -1,34 +1,17 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { User } from '../models/User';
 import { mockUsers } from 'src/__mocks__/mockUsers';
-import { createWriteStream, existsSync, mkdirSync } from 'fs';
+import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import * as Upload from 'graphql-upload/Upload.js';
-import Jimp from 'jimp';
-
-async function addWatermark(inputImagePath, outputImagePath, watermarkText) {
-  const image = await Jimp.read(inputImagePath);
-  const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
-
-  image.print(
-    font,
-    10, // x
-    10, // y
-    {
-      text: watermarkText,
-      alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
-      alignmentY: Jimp.VERTICAL_ALIGN_TOP,
-    },
-    image.bitmap.width,
-    image.bitmap.height,
-  );
-
-  await image.writeAsync(outputImagePath);
-}
+import { createCanvas, loadImage, registerFont } from 'canvas';
+import { ConfigService } from '@nestjs/config';
 
 @Resolver()
 export class UserResolver {
+  constructor(private configService: ConfigService) {}
+
   @Query(() => User, { nullable: true })
   getUserById(@Args('id', { type: () => Int }) id: number) {
     return mockUsers.find((user) => user.id === id);
@@ -38,24 +21,20 @@ export class UserResolver {
   getUsers() {
     return mockUsers;
   }
+
   @Mutation(() => Boolean, { name: 'uploadImage' })
   async uploadImage(
-    @Args({ name: 'image', type: () => GraphQLUpload })
+    @Args('image', { type: () => GraphQLUpload })
     image: Upload,
-    @Args({ name: 'createFileInDirectory', type: () => Boolean })
+    @Args('createFileInDirectory', { type: () => Boolean })
     createFileInDirectory: boolean,
   ) {
     const file = await image;
 
-    console.log(file.filename);
-    console.log('UPLOAD_IMAGE_CALLED', {
-      file,
-      createFileInDirectory,
-    });
-
     return new Promise((resolve, reject) => {
       if (createFileInDirectory) {
-        const dirPath = join(__dirname, '/uploads');
+        const rootPath = this.configService.get<string>('rootPath');
+        const dirPath = this.configService.get<string>('uploadsPath');
 
         console.log(dirPath, existsSync(dirPath));
 
@@ -68,25 +47,27 @@ export class UserResolver {
           .pipe(createWriteStream(`${dirPath}/${file.filename}`))
           .on('finish', () => {
             console.log('IMAGE_CREATED_IN_DIRECTORY');
-            addWatermark(
-              join(dirPath, file.filename),
-              join(dirPath, 'new.jpg'),
-              'Watermark',
-            );
-            resolve(true);
-          })
-          .on('error', (error) => {
-            console.log('IMAGE_UPLOAD_ERROR', error);
-            reject(false);
-          });
-      } else {
-        file
-          .createReadStream()
-          .on('data', (data) => {
-            console.log('DATE_FROM_STREAM', data);
-          })
-          .on('end', () => {
-            console.log('END_OF_STREAM');
+
+            loadImage(join(rootPath, file.filename)).then(async (img) => {
+              registerFont(join(rootPath, 'NotoSansKR-Regular.ttf'), {
+                family: 'NotoSansKR',
+              });
+              const create = createCanvas(1024, 500);
+              const context = create.getContext('2d');
+              console.log(img);
+              context.drawImage(img, 0, 0, 1024, 500);
+              context.fillStyle = '#ffffff';
+              context.font = '52px NotoSansKR';
+              context.fillText('안녕zzzzcv', 360, 360);
+              context.beginPath();
+              context.arc(512, 166, 128, 0, Math.PI * 2, true);
+              context.stroke();
+              context.fill();
+              const buffer = create.toBuffer('image/png');
+              // 파일로 저장
+              writeFileSync(join(rootPath, 'output.png'), buffer);
+            });
+
             resolve(true);
           })
           .on('error', (error) => {
