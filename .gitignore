@@ -3,6 +3,11 @@
 /node_modules
 /build
 
+# Images
+*.jpg
+*.jpeg
+*.png
+
 # Logs
 logs
 *.log
