@@ -18,11 +18,25 @@ type User {
 type Query {
   getUserById(id: Int!): User
   getUsers: [User!]!
+  getUserSettingById(id: Float!): UserSetting!
 }
 
 type Mutation {
+  createUser(createUserData: CreateUserInput!): User!
   uploadImage(image: Upload!, createFileInDirectory: Boolean!): Boolean!
+  createUserSettings(createUserSettingsData: createUserSettingsInput!): UserSetting!
+}
+
+input CreateUserInput {
+  username: String!
+  displayName: String
 }
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input createUserSettingsInput {
+  userId: Int!
+  receiveNotifications: Boolean = false
+  receiveEmails: Boolean = false
+}

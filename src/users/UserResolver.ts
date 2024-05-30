@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import {
   Args,
   Int,
@@ -7,42 +8,46 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { User } from '../models/User';
-import { mockUsers } from 'src/__mocks__/mockUsers';
+import { createCanvas, loadImage, registerFont } from 'canvas';
 import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
 import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import * as Upload from 'graphql-upload/Upload.js';
-import { createCanvas, loadImage, registerFont } from 'canvas';
-import { ConfigService } from '@nestjs/config';
-import { UserSetting } from '../models/UserSetting';
-import { mockUserSettings } from 'src/__mocks__/mcokUserSettings';
-
-export const incrementalId = 3;
+import { join } from 'path';
+import { User } from 'src/graphql/models/User';
+import { UserSetting } from 'src/graphql/models/UserSetting';
+import { CreateUserInput } from 'src/graphql/utils/CreateUserInput';
+import { UserService } from './UserService';
+import { UserSettingService } from './UserSettingService';
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private userService: UserService,
+    private userSettingService: UserSettingService,
+    private configService: ConfigService,
+  ) {}
 
   @Query(() => User, { nullable: true })
   getUserById(@Args('id', { type: () => Int }) id: number) {
-    return mockUsers.find((user) => user.id === id);
+    return this.userService.getUserById(id);
   }
 
   @Query(() => [User])
   getUsers() {
-    return mockUsers;
+    return this.userService.getUsers();
   }
 
-  @ResolveField(() => UserSetting, { name: 'settings', nullable: true })
-  getUserSettings(@Parent() user: User) {
-    return mockUserSettings.find((setting) => setting.userId === user.id);
+  // @ResolveField(() => UserSetting, { name: 'settings', nullable: true })
+  // getUserSettings(@Parent() user: User) {
+  //   return this.userSettingService.getUserSettingById(user.id);
+  // }
+
+  @Mutation(() => User)
+  createUser(@Args('createUserData') createUserData: CreateUserInput) {
+    return this.userService.createUser(createUserData);
   }
 
-  // @Mutation(() => User)
-  // createUser(@Args('username')) {}
-
-  @Mutation(() => Boolean, { name: 'uploadImage' })
+  @Mutation(() => Boolean)
   async uploadImage(
     @Args('image', { type: () => GraphQLUpload })
     image: Upload,

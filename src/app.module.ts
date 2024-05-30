@@ -1,9 +1,12 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { UserResolver } from './graphql/resolvers/UserResolver';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import appConfig from './app.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './graphql/models/User';
+import { UserSetting } from './graphql/models/UserSetting';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -14,8 +17,20 @@ import appConfig from './app.config';
     ConfigModule.forRoot({
       load: [appConfig],
     }),
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'testuser',
+      password: '1234',
+      database: 'graphql_tutorial',
+      entities: [User, UserSetting],
+      synchronize: true,
+      logging: true,
+    }),
+    UsersModule,
   ],
   controllers: [],
-  providers: [ConfigService, UserResolver],
+  providers: [],
 })
 export class AppModule {}
