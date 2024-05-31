@@ -13,9 +13,8 @@ import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'fs';
 import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import * as Upload from 'graphql-upload/Upload.js';
 import { join } from 'path';
-import { User } from 'src/graphql/models/User';
-import { UserSetting } from 'src/graphql/models/UserSetting';
-import { CreateUserInput } from 'src/graphql/utils/CreateUserInput';
+import { User } from '../graphql/models/User';
+import { CreateUserInput } from '../graphql/utils/CreateUserInput';
 import { UserService } from './UserService';
 import { UserSettingService } from './UserSettingService';
 

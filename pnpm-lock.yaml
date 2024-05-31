@@ -38,6 +38,9 @@ importers:
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
+      graphql-tag:
+        specifier: ^2.12.6
+        version: 2.12.6(graphql@16.8.1)
       graphql-upload:
         specifier: ^14.0.0
         version: 14.0.0(@types/express@4.17.21)(@types/koa@2.15.0)(graphql@16.8.1)

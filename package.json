@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "set NODE_ENV=TEST&& jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@apollo/server": "^4.10.4",
@@ -30,6 +30,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "canvas": "^2.11.2",
     "graphql": "^16.8.1",
+    "graphql-tag": "^2.12.6",
     "graphql-upload": "^14.0.0",
     "mysql2": "^3.9.9",
     "reflect-metadata": "^0.2.2",

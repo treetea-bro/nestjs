@@ -23,10 +23,13 @@ import { UsersModule } from './users/users.module';
       port: 3306,
       username: 'testuser',
       password: '1234',
-      database: 'graphql_tutorial',
+      database:
+        process.env.NODE_ENV.toUpperCase() === 'TEST'
+          ? 'graphql_tutorial_test'
+          : 'graphql_tutorial',
       entities: [User, UserSetting],
       synchronize: true,
-      logging: true,
+      // logging: true,
     }),
     UsersModule,
   ],
